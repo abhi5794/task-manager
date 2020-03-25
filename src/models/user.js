@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs')
 const userSchema = mongoose.Schema({
     name:{
         type: String,
+        unique: true,
         required: true,
         trim: true
     },
@@ -42,10 +43,26 @@ const userSchema = mongoose.Schema({
     }
 })
 
+//function is being used as this is involved
+userSchema.statics.findByCredentials = async function (email, password){
+    const user = await this.findOne({ email })
+
+    if(!user){
+        throw new Error('Unable to log in')
+    }
+    const isMatch = await bcrypt.compare(password, user.password)
+
+    if(!isMatch){
+        throw new Error('Unable to log in')
+    }
+
+    return user
+}
+
+//hash the plaintext password before saving
 userSchema.pre('save', async function(next){
-    const user = this
-    if(user.isModified('password')){
-        user.password = await bcrypt.hash(user.password, 8)
+    if(this.isModified('password')){
+        this.password = await bcrypt.hash(this.password, 8)
     }
 
     next() //needs to be specified for the save to occur, it is an event
