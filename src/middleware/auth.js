@@ -11,6 +11,7 @@ const auth = async (req, res, next)=>{
             throw new Error()//to hand the control to the catch block
         }
 
+        req.token = token //these two are accessible to other routes in the user routes file
         req.user = user //passing the user to route handlers so that they don't have to fin the user again
         next()//allows the route handler to run
 

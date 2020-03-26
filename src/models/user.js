@@ -50,6 +50,14 @@ const userSchema = mongoose.Schema({
     }]
 })
 
+//hide private data
+userSchema.methods.toJSON = function(){
+    const userObject = this.toObject()
+    delete userObject.password
+    delete userObject.tokens
+    return userObject
+}
+
 //method because we are acting on the instance and not on the class
 userSchema.methods.generateAuthToken = async function(){
     const token = jwt.sign({_id: this._id.toString() }, 'thisis')

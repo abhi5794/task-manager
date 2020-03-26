@@ -8,6 +8,7 @@ router.get('/users/me',auth,  async (req,res)=>{ //passing auth as second arg fo
     res.send(req.user)
 })
 
+//create users
 router.post('/users',async (req,res)=>{
     const user = User(req.body)
     
@@ -15,19 +16,46 @@ router.post('/users',async (req,res)=>{
         await user.save()
         const token = await user.generateAuthToken()
 
-        res.status(201).send({ user, token })
+        res.status(201).send({ user, token }) //this is accessible using req.user & req.token
     }catch(e){
         res.status(400).send(e)
     }
 })
 
+//login
 router.post('/users/login', async (req,res) => {
     try{
         const user = await User.findByCredentials(req.body.email, req.body.password)
         const token = await user.generateAuthToken() //it is on a specific user and so User is not used
-        res.send({user, token})
+        res.send({user, token}) //this is accessible using req.user & req.token
     }catch (e){
         res.status(400).send()
+    }
+})
+
+//logout
+router.post('/users/logout', auth, async (req,res)=>{
+    try{
+        //req.user and req.token and being sent back from create and login routes
+        req.user.tokens = req.user.tokens.filter((token)=>{ //removed the current token
+            return token.token !== req.token //return values that are not matching the token
+        })
+        await req.user.save()
+
+        res.send('Logged out')
+    }catch(e){
+        res.status(500).send()
+    }
+})
+
+//logout all
+router.post('/users/logoutAll', auth, async (req,res)=>{
+    try{
+        req.user.tokens = []
+        await req.user.save()
+        res.send('Logged out of all accounts')
+    }catch(e){
+        res.status(500).send()
     }
 })
 
