@@ -16,11 +16,3 @@ app.listen(port, ()=>{
     console.log('Server is up on '+ port)
 })
 
-// const jwt = require('jsonwebtoken')
-const myFunction = async () =>{
-    // const token = jwt.sign({_id:'abcd123'}, 'taskmanagerapp',{expiresIn: '2 seconds'})
-    // console.log(token)
-    // console.log(jwt.verify(token, 'taskmanagerapp'))
-}
-
-myFunction()

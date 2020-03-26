@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken')
 const userSchema = mongoose.Schema({
     name:{
         type: String,
-        unique: true,
         required: true,
         trim: true
     },
@@ -23,6 +22,7 @@ const userSchema = mongoose.Schema({
     },
     email:{
         type: String,
+        unique: true,
         required: true,
         trim: true,
         lowercase: true,
@@ -48,6 +48,13 @@ const userSchema = mongoose.Schema({
             required:true
         }
     }]
+})
+
+//setting up virtual relationship between Task and User
+userSchema.virtual('tasks',{
+    ref:'Task',
+    localField: '_id', //mapping relationship
+    foreignField: 'owner'
 })
 
 //hide private data
