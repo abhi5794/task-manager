@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const userSchema = mongoose.Schema({
     name:{
@@ -40,8 +41,24 @@ const userSchema = mongoose.Schema({
                 throw new Error('Age must be a positive number')
             }
         }
-    }
+    },
+    tokens:[{
+        token:{
+            type:String,
+            required:true
+        }
+    }]
 })
+
+//method because we are acting on the instance and not on the class
+userSchema.methods.generateAuthToken = async function(){
+    const token = jwt.sign({_id: this._id.toString() }, 'thisis')
+
+    this.tokens = this.tokens.concat({ token })
+    await this.save()
+
+    return token
+}
 
 //function is being used as this is involved
 userSchema.statics.findByCredentials = async function (email, password){

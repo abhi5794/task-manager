@@ -1,20 +1,31 @@
 const express = require('express')
 const User = require('../models/user')
 const router = new express.Router()
+const auth = require('../middleware/auth')
 
-router.get('/users', async (req,res)=>{
+//get your user profile
+router.get('/users/me',auth,  async (req,res)=>{ //passing auth as second arg for middleware
+    res.send(req.user)
+})
+
+router.post('/users',async (req,res)=>{
+    const user = User(req.body)
+    
     try{
-        const user = await User.find({})
-        res.send(user)
+        await user.save()
+        const token = await user.generateAuthToken()
+
+        res.status(201).send({ user, token })
     }catch(e){
-        res.status(500).send()
+        res.status(400).send(e)
     }
 })
 
 router.post('/users/login', async (req,res) => {
     try{
         const user = await User.findByCredentials(req.body.email, req.body.password)
-        res.send(user)
+        const token = await user.generateAuthToken() //it is on a specific user and so User is not used
+        res.send({user, token})
     }catch (e){
         res.status(400).send()
     }
@@ -31,17 +42,6 @@ router.get('/users/:id',async (req,res)=>{
         res.send(user)
     }catch(e){
         res.status(500).send('Server error')
-    }
-})
-
-router.post('/users',async (req,res)=>{
-    const user = User(req.body)
-    
-    try{
-        await user.save()
-        res.status(201).send(user)
-    }catch(e){
-        res.status(400).send(e)
     }
 })
 
