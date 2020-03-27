@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Task = require('./task')
 
 const userSchema = mongoose.Schema({
     name:{
@@ -48,6 +49,8 @@ const userSchema = mongoose.Schema({
             required:true
         }
     }]
+}, {
+    timestamps:true // enable timestamps
 })
 
 //setting up virtual relationship between Task and User
@@ -57,7 +60,8 @@ userSchema.virtual('tasks',{
     foreignField: 'owner'
 })
 
-//hide private data
+//hide private data, JSON.stringify is called every time res.send() is called,
+//which in turn calls .toJSON so giving us the option to customize the output
 userSchema.methods.toJSON = function(){
     const userObject = this.toObject()
     delete userObject.password
@@ -65,7 +69,7 @@ userSchema.methods.toJSON = function(){
     return userObject
 }
 
-//method because we are acting on the instance and not on the class
+//instance method because we are acting on the instance and not on the class
 userSchema.methods.generateAuthToken = async function(){
     const token = jwt.sign({_id: this._id.toString() }, 'thisis')
 
@@ -75,7 +79,7 @@ userSchema.methods.generateAuthToken = async function(){
     return token
 }
 
-//function is being used as this is involved
+//Class methods is being used as this is involved
 userSchema.statics.findByCredentials = async function (email, password){
     const user = await this.findOne({ email })
 
@@ -91,6 +95,7 @@ userSchema.statics.findByCredentials = async function (email, password){
     return user
 }
 
+//Middleware
 //hash the plaintext password before saving
 userSchema.pre('save', async function(next){
     if(this.isModified('password')){
@@ -99,6 +104,12 @@ userSchema.pre('save', async function(next){
 
     next() //needs to be specified for the save to occur, it is an event
 
+})
+
+//delete tasks when user is deleted
+userSchema.pre('remove', async function(next){
+    await Task.deleteMany({owner: this._id})
+    next()
 })
 
 const User = mongoose.model('User', userSchema)
