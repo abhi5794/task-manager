@@ -48,7 +48,10 @@ const userSchema = mongoose.Schema({
             type:String,
             required:true
         }
-    }]
+    }],
+    avatar:{
+        type: Buffer
+    }
 }, {
     timestamps:true // enable timestamps
 })
@@ -66,12 +69,13 @@ userSchema.methods.toJSON = function(){
     const userObject = this.toObject()
     delete userObject.password
     delete userObject.tokens
+    delete userObject.avatar
     return userObject
 }
 
 //instance method because we are acting on the instance and not on the class
 userSchema.methods.generateAuthToken = async function(){
-    const token = jwt.sign({_id: this._id.toString() }, 'thisis')
+    const token = jwt.sign({_id: this._id.toString() }, process.env.JWT_SECRET)
 
     this.tokens = this.tokens.concat({ token })
     await this.save()

@@ -15,6 +15,8 @@ router.post('/tasks',auth , async (req,res)=>{
     }catch(e){
         res.status(400).send(e)
     }
+},(error, req, res, next)=>{
+    res.status(400).send({error:error})
 })
 
 //GET /tasks?completed=true
@@ -48,6 +50,8 @@ router.get('/tasks',auth ,async (req,res)=>{
     }catch(e){
         res.status(500).send()
     }
+},(error, req, res, next)=>{
+    res.status(400).send({error:error})
 })
 
 router.get('/tasks/:id',auth , async (req,res)=>{
@@ -63,6 +67,8 @@ router.get('/tasks/:id',auth , async (req,res)=>{
     }catch(e){
         res.status(500).send('Server error')
     }
+},(error, req, res, next)=>{
+    res.status(400).send({error:error})
 })
 
 router.patch('/tasks/:id', auth, async (req,res)=>{
@@ -89,6 +95,8 @@ router.patch('/tasks/:id', auth, async (req,res)=>{
     }catch(e){
         res.status(400).send(e)
     }
+},(error, req, res, next)=>{
+    res.status(400).send({error:error})
 })
 
 //DELETE
@@ -104,6 +112,8 @@ router.delete('/tasks/:id', auth, async (req,res)=>{
     }catch(e){
         res.status(500).send()
     }
+},(error, req, res, next)=>{
+    res.status(400).send({error:error})
 })
 
 module.exports = router
