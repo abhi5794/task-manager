@@ -1,16 +1,7 @@
-const express = require('express')
-require('./db/mongoose')
+//this is for dev and prod
+const app = require('./app')
 
-// const Task = require('./models/task')
-const userRouter = require('./routers/user')
-const taskRouter = require('./routers/task')
-
-const app = express()
 const port = process.env.PORT
-
-app.use(express.json()) // it will parse the incoming body data to json
-app.use(userRouter)
-app.use(taskRouter)
 
 app.listen(port, ()=>{
     console.log('Server is up on '+ port)
